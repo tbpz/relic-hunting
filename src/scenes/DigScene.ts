@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 
 // ─────────────────────── Layout constants ──────────────────────────
 const W = 448;   // canvas width
-const H = 552;   // canvas height (grid 448 + HUD 56 + stop-bar 48)
+const H = 568;   // canvas height (grid 448 + HUD 72 + stop-bar 48)
 
 const PANEL_W = 380;
 const PANEL_H = 210;
@@ -74,7 +74,7 @@ export class DigScene extends Phaser.Scene {
 
     private buildBackground() {
         // Dim the game world behind
-        this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.72).setDepth(0);
+        this.add.rectangle(W / 2, H / 2, W, H, 0x3d2b1f, 0.72).setDepth(0);
 
         // Panel
         const panel = this.add.rectangle(
@@ -82,9 +82,9 @@ export class DigScene extends Phaser.Scene {
             PANEL_Y + PANEL_H / 2,
             PANEL_W,
             PANEL_H,
-            0x1a1040
+            0x5c4033
         ).setDepth(1);
-        panel.setStrokeStyle(2, 0x9b59b6);
+        panel.setStrokeStyle(2, 0xc9a96e);
 
         // Panel glow effect — drawn as a slightly larger rect behind
         this.add.rectangle(
@@ -92,7 +92,7 @@ export class DigScene extends Phaser.Scene {
             PANEL_Y + PANEL_H / 2,
             PANEL_W + 6,
             PANEL_H + 6,
-            0x9b59b6,
+            0xc9a96e,
             0.25
         ).setDepth(0);
     }
@@ -104,8 +104,8 @@ export class DigScene extends Phaser.Scene {
         this.add.text(cx, PANEL_Y + 18, '⛏  DIGGING', {
             fontFamily: 'monospace',
             fontSize: '18px',
-            color: '#e0aaff',
-            stroke: '#000',
+            color: '#f5e6c8',
+            stroke: '#2b1d0e',
             strokeThickness: 3,
         }).setOrigin(0.5, 0).setDepth(2);
 
@@ -113,14 +113,14 @@ export class DigScene extends Phaser.Scene {
         this.tapCountText = this.add.text(cx, BAR_Y + BAR_H + 12, '', {
             fontFamily: 'monospace',
             fontSize: '13px',
-            color: '#aaaacc',
+            color: '#d4c4a0',
         }).setOrigin(0.5, 0).setDepth(2);
 
         // Status / combo
         this.statusText = this.add.text(cx, PANEL_Y + 46, `Combo: 0 / ${MAX_TAPS}`, {
             fontFamily: 'monospace',
             fontSize: '13px',
-            color: '#ccccff',
+            color: '#f5e6c8',
         }).setOrigin(0.5, 0).setDepth(2);
 
         // Hit/miss feedback (flash text)
@@ -128,7 +128,7 @@ export class DigScene extends Phaser.Scene {
             fontFamily: 'monospace',
             fontSize: '16px',
             color: '#ffffff',
-            stroke: '#000',
+            stroke: '#2b1d0e',
             strokeThickness: 4,
         }).setOrigin(0.5, 0.5).setDepth(3).setAlpha(0);
 
@@ -143,7 +143,7 @@ export class DigScene extends Phaser.Scene {
         g.setDepth(2);
 
         // ── Background track ──────────────────────────────────────────
-        g.fillStyle(0x0d0d1a);
+        g.fillStyle(0x3d2b1f);
         g.fillRect(BAR_X, BAR_Y, BAR_W, BAR_H);
 
         // ── Perfect zone ─────────────────────────────────────────────
@@ -151,7 +151,7 @@ export class DigScene extends Phaser.Scene {
         g.fillRect(this.zoneX, BAR_Y, this.zoneW, BAR_H);
 
         // ── Track border ─────────────────────────────────────────────
-        g.lineStyle(2, 0x6c3483);
+        g.lineStyle(2, 0xc9a96e);
         g.strokeRect(BAR_X, BAR_Y, BAR_W, BAR_H);
 
         // ── Cursor (vertical line + cap) ─────────────────────────────
@@ -250,7 +250,7 @@ export class DigScene extends Phaser.Scene {
             fontSize: '22px',
             color: resultColor,
             align: 'center',
-            stroke: '#000',
+            stroke: '#2b1d0e',
             strokeThickness: 4,
         }).setOrigin(0.5).setDepth(10);
 

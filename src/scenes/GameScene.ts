@@ -10,10 +10,10 @@ export const GRID_COLS = 7;
 export const GRID_ROWS = 7;
 export const CELL_SIZE = 64;
 export const CANVAS_W = GRID_COLS * CELL_SIZE;          // 448
-export const CANVAS_H = GRID_ROWS * CELL_SIZE + 56 + 48; // 552
+export const CANVAS_H = GRID_ROWS * CELL_SIZE + 72 + 48; // 568  (grid 448 + HUD 72 + stop 48)
 
 const HUD_Y = GRID_ROWS * CELL_SIZE;  // 448
-const STOPBAR_Y = HUD_Y + 56;             // 504
+const STOPBAR_Y = HUD_Y + 72;             // 520
 
 // ── Cell types ─────────────────────────────────────────────────────
 const CELL_EMPTY = 0;
@@ -25,7 +25,7 @@ function chebyshev(ax: number, ay: number, bx: number, by: number) {
 }
 
 // ── Tile colours ───────────────────────────────────────────────────
-const TILE_COLORS = [0x1a1a2e, 0x16213e, 0x0f3460, 0x1a1a2e];
+const TILE_COLORS = [0xc9b896, 0xb8a67e, 0xc2ab88, 0xb0a07a];
 
 // ── Reward ─────────────────────────────────────────────────────────
 const PROB_TRAP = 0.15;
@@ -77,6 +77,7 @@ export class GameScene extends Phaser.Scene {
 
     // HUD + dev
     private hudText!: Phaser.GameObjects.Text;
+    private bagText!: Phaser.GameObjects.Text;
     private modeBadge!: Phaser.GameObjects.Text;
 
     // Fade overlay
@@ -121,8 +122,8 @@ export class GameScene extends Phaser.Scene {
         this.rockPositions = [];
 
         const run = RunManager.getInstance();
-        this.cameras.main.setBackgroundColor('#0d0d1a');
-        this.cameras.main.fadeIn(400, 0, 0, 0);
+        this.cameras.main.setBackgroundColor('#d4c4a0');
+        this.cameras.main.fadeIn(400, 212, 196, 160);
 
         this.rockPositions = generateRockPositions(8, this.playerGridX, this.playerGridY);
         this.buildCellTypes();
@@ -181,14 +182,14 @@ export class GameScene extends Phaser.Scene {
             this.gridCells[row] = [];
             for (let col = 0; col < GRID_COLS; col++) {
                 const fill = this.cellTypes[row][col] === CELL_ROCK
-                    ? 0x111118
+                    ? 0xa09070
                     : TILE_COLORS[(row + col) % TILE_COLORS.length];
                 const cell = this.add.rectangle(
                     col * CELL_SIZE + CELL_SIZE / 2,
                     row * CELL_SIZE + CELL_SIZE / 2,
                     CELL_SIZE - 2, CELL_SIZE - 2, fill
                 );
-                cell.setStrokeStyle(1, 0x2a2a4a);
+                cell.setStrokeStyle(1, 0x8a7a60);
                 this.gridCells[row][col] = cell;
             }
         }
@@ -211,7 +212,7 @@ export class GameScene extends Phaser.Scene {
         const cx = this.playerGridX * CELL_SIZE + CELL_SIZE / 2;
         const cy = this.playerGridY * CELL_SIZE + CELL_SIZE / 2;
 
-        const glow = this.add.circle(0, 0, 28, 0x7b2d8b, 0.4);
+        const glow = this.add.circle(0, 0, 28, 0xd4a017, 0.4);
         const sprite = this.add.image(0, 0, 'player').setDisplaySize(44, 44);
 
         this.player = this.add.container(cx, cy, [glow, sprite]);
@@ -233,8 +234,8 @@ export class GameScene extends Phaser.Scene {
                 const tile = this.add.rectangle(
                     col * CELL_SIZE + CELL_SIZE / 2,
                     row * CELL_SIZE + CELL_SIZE / 2,
-                    CELL_SIZE, CELL_SIZE, 0x000000
-                ).setAlpha(0.92).setDepth(5);
+                    CELL_SIZE, CELL_SIZE, 0x6b5e47
+                ).setAlpha(0.85).setDepth(5);
                 this.shroud[row][col] = tile;
             }
         }
@@ -242,17 +243,30 @@ export class GameScene extends Phaser.Scene {
 
     /* ── HUD ────────────────────────────────────────────────────── */
     private buildHUD(run: RunManager) {
-        this.add.rectangle(CANVAS_W / 2, HUD_Y + 28, CANVAS_W, 56, 0x0d0d1a)
+        // Background bar (72px tall)
+        this.add.rectangle(CANVAS_W / 2, HUD_Y + 36, CANVAS_W, 72, 0x3d2b1f)
             .setDepth(20);
 
-        this.hudText = this.add.text(12, HUD_Y + 10, this.hudString(run), {
+        // Divider line between row 1 and row 2
+        this.add.rectangle(CANVAS_W / 2, HUD_Y + 30, CANVAS_W - 16, 1, 0x5c4033)
+            .setDepth(21);
+
+        // Row 1: core stats
+        this.hudText = this.add.text(12, HUD_Y + 6, this.hudString(run), {
             fontFamily: 'monospace', fontSize: '13px',
-            color: '#e0aaff', stroke: '#000', strokeThickness: 2,
+            color: '#f5e6c8', stroke: '#2b1d0e', strokeThickness: 2,
         }).setDepth(21);
 
-        this.modeBadge = this.add.text(CANVAS_W - 8, HUD_Y + 8, '', {
+        // Row 2: bag summary
+        this.bagText = this.add.text(12, HUD_Y + 38, this.bagString(run), {
             fontFamily: 'monospace', fontSize: '11px',
-            color: '#aaffaa', stroke: '#000', strokeThickness: 2,
+            color: '#c4b490', stroke: '#2b1d0e', strokeThickness: 2,
+        }).setDepth(21);
+
+        // Mode badge (top-right)
+        this.modeBadge = this.add.text(CANVAS_W - 8, HUD_Y + 6, '', {
+            fontFamily: 'monospace', fontSize: '11px',
+            color: '#aaffaa', stroke: '#2b1d0e', strokeThickness: 2,
         }).setOrigin(1, 0).setDepth(22).setInteractive({ useHandCursor: true });
 
         this.modeBadge.on('pointerdown', () => {
@@ -267,7 +281,7 @@ export class GameScene extends Phaser.Scene {
     /* ── Stop bar ───────────────────────────────────────────────── */
     private buildStopBar() {
         // Dark strip
-        this.add.rectangle(CANVAS_W / 2, STOPBAR_Y + 24, CANVAS_W, 48, 0x0a0a14)
+        this.add.rectangle(CANVAS_W / 2, STOPBAR_Y + 24, CANVAS_W, 48, 0x4a3525)
             .setDepth(20);
 
         // STOP button
@@ -278,7 +292,7 @@ export class GameScene extends Phaser.Scene {
 
         const btnText = this.add.text(CANVAS_W / 2, STOPBAR_Y + 24, '■  End Run', {
             fontFamily: 'monospace', fontSize: '14px',
-            color: '#ffaaaa', stroke: '#000', strokeThickness: 3,
+            color: '#ffaaaa', stroke: '#2b1d0e', strokeThickness: 3,
         }).setOrigin(0.5).setDepth(22);
 
         btn.on('pointerover', () => { btn.setFillStyle(0x991a1a); btnText.setColor('#ffcccc'); });
@@ -288,8 +302,14 @@ export class GameScene extends Phaser.Scene {
 
     /* ── HUD strings ────────────────────────────────────────────── */
     private hudString(run: RunManager): string {
-        const bag = run.runBag.length ? run.runBag.slice(-3).join(', ') : '—';
-        return `🏚 F${this.floorNumber}  ❤ HP:${run.hp}  🛡 Dur:${run.durability}  🎒 ${bag}`;
+        return `🏚 F${this.floorNumber}  ❤ HP:${run.hp}  🛡 Dur:${run.durability}`;
+    }
+
+    private bagString(run: RunManager): string {
+        const count = run.runBag.length;
+        if (count === 0) return '🎒 empty';
+        const last = run.runBag[count - 1];
+        return `🎒 ${count} item${count !== 1 ? 's' : ''} │ +${last}`;
     }
 
     private updateModeBadge() {
@@ -418,10 +438,10 @@ export class GameScene extends Phaser.Scene {
 
     /* ── Floating popup ─────────────────────────────────────────── */
     private showRewardPopup(x: number, y: number, label: string, color: string) {
-        const pill = this.add.rectangle(x, y, label.length * 8 + 20, 26, 0x000000, 0.7).setDepth(30);
+        const pill = this.add.rectangle(x, y, label.length * 8 + 20, 26, 0x3d2b1f, 0.85).setDepth(30);
         const text = this.add.text(x, y, label, {
             fontFamily: 'monospace', fontSize: '14px',
-            color, stroke: '#000', strokeThickness: 3,
+            color, stroke: '#2b1d0e', strokeThickness: 3,
         }).setOrigin(0.5).setDepth(31);
 
         this.tweens.add({
@@ -471,7 +491,7 @@ export class GameScene extends Phaser.Scene {
             for (let col = 0; col < GRID_COLS; col++) {
                 this.gridCells[row][col].setFillStyle(
                     this.cellTypes[row][col] === CELL_ROCK
-                        ? 0x111118
+                        ? 0xa09070
                         : TILE_COLORS[(row + col) % TILE_COLORS.length]
                 );
             }
@@ -481,7 +501,7 @@ export class GameScene extends Phaser.Scene {
 
         for (let row = 0; row < GRID_ROWS; row++)
             for (let col = 0; col < GRID_COLS; col++)
-                this.shroud[row][col].setAlpha(0.92);
+                this.shroud[row][col].setAlpha(0.85);
 
         this.revealFog(this.playerGridX, this.playerGridY);
         this.showFloorBanner();
@@ -490,11 +510,11 @@ export class GameScene extends Phaser.Scene {
     private showFloorBanner() {
         const cx = CANVAS_W / 2;
         const cy = GRID_ROWS * CELL_SIZE / 2;
-        const bg = this.add.rectangle(cx, cy, 240, 50, 0x1a1040, 0.9)
-            .setDepth(55).setStrokeStyle(2, 0x9b59b6);
+        const bg = this.add.rectangle(cx, cy, 240, 50, 0x3d2b1f, 0.9)
+            .setDepth(55).setStrokeStyle(2, 0xc9a96e);
         const text = this.add.text(cx, cy, `— Floor ${this.floorNumber} —`, {
             fontFamily: 'monospace', fontSize: '18px',
-            color: '#e0aaff', stroke: '#000', strokeThickness: 4,
+            color: '#f5e6c8', stroke: '#2b1d0e', strokeThickness: 4,
         }).setOrigin(0.5).setDepth(56);
         this.tweens.add({
             targets: [text, bg], alpha: 0,
@@ -532,7 +552,7 @@ export class GameScene extends Phaser.Scene {
             for (let col = 0; col < GRID_COLS; col++) {
                 const d = chebyshev(col, row, px, py);
                 const t = this.shroud[row][col];
-                const a = d <= 1 ? 0 : d === 2 ? 0.55 : 0.92;
+                const a = d <= 1 ? 0 : d === 2 ? 0.50 : 0.85;
                 this.tweens.add({ targets: t, alpha: a, duration: 200, ease: 'Sine.easeOut' });
             }
         }
@@ -542,5 +562,6 @@ export class GameScene extends Phaser.Scene {
     update() {
         const run = RunManager.getInstance();
         this.hudText.setText(this.hudString(run));
+        this.bagText.setText(this.bagString(run));
     }
 }

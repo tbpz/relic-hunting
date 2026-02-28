@@ -3,7 +3,7 @@ import { RunManager } from '../managers/RunManager';
 
 // ── Layout ─────────────────────────────────────────────────────────
 const W = 448;
-const H = 552;   // grid(448) + hud(56) + stop-bar(48)
+const H = 568;   // grid(448) + hud(72) + stop-bar(48)
 
 const LS_KEY = 'relicHunter_lastRun';
 
@@ -33,10 +33,10 @@ export class EndScene extends Phaser.Scene {
         }
 
         // ── Background ───────────────────────────────────────────
-        this.cameras.main.setBackgroundColor(isSuccess ? '#0a1628' : '#1a0808');
+        this.cameras.main.setBackgroundColor(isSuccess ? '#b8a880' : '#8a5a4a');
 
         // Animated vignette background glow
-        const glowColor = isSuccess ? 0x1e3a5f : 0x3a0f0f;
+        const glowColor = isSuccess ? 0xc9b896 : 0x7a4a3a;
         this.add.rectangle(W / 2, H / 2, W, H, glowColor, 0.5);
 
         // ── Header ───────────────────────────────────────────────
@@ -47,7 +47,7 @@ export class EndScene extends Phaser.Scene {
             fontFamily: 'monospace',
             fontSize: '20px',
             color: titleColor,
-            stroke: '#000',
+            stroke: '#2b1d0e',
             strokeThickness: 4,
             align: 'center',
         }).setOrigin(0.5);
@@ -58,13 +58,13 @@ export class EndScene extends Phaser.Scene {
             : 'The dungeon claims another life...', {
             fontFamily: 'monospace',
             fontSize: '13px',
-            color: '#aaaacc',
+            color: '#f5e6c8',
         }).setOrigin(0.5);
 
         // ── Stats panel ──────────────────────────────────────────
         const panelY = 130;
-        this.add.rectangle(W / 2, panelY + 60, 360, 108, 0x0a0a1a, 0.8)
-            .setStrokeStyle(1, 0x334455);
+        this.add.rectangle(W / 2, panelY + 60, 360, 108, 0x3d2b1f, 0.8)
+            .setStrokeStyle(1, 0x8a7a60);
 
         const stats = [
             `🏚 Floor Reached  :  ${data.floor}`,
@@ -75,7 +75,7 @@ export class EndScene extends Phaser.Scene {
             this.add.text(W / 2, panelY + 16 + i * 28, line, {
                 fontFamily: 'monospace',
                 fontSize: '12px',
-                color: '#c0c8e0',
+                color: '#f5e6c8',
             }).setOrigin(0.5);
         });
 
@@ -84,7 +84,7 @@ export class EndScene extends Phaser.Scene {
         this.add.text(W / 2, lootY, isSuccess ? '🎒 Loot Saved to Vault:' : '🎒 Loot Lost:', {
             fontFamily: 'monospace',
             fontSize: '13px',
-            color: isSuccess ? '#e0aaff' : '#cc6666',
+            color: isSuccess ? '#f5e6c8' : '#cc6666',
         }).setOrigin(0.5);
 
         const bag = run.runBag;
@@ -92,7 +92,7 @@ export class EndScene extends Phaser.Scene {
             this.add.text(W / 2, lootY + 28, '— Nothing collected —', {
                 fontFamily: 'monospace',
                 fontSize: '12px',
-                color: '#666688',
+                color: '#8a7a60',
             }).setOrigin(0.5);
         } else {
             // Tally counts
@@ -115,27 +115,27 @@ export class EndScene extends Phaser.Scene {
             this.add.text(W / 2, H - 120, '💾 Loot saved to localStorage', {
                 fontFamily: 'monospace',
                 fontSize: '11px',
-                color: '#666688',
+                color: '#8a7a60',
             }).setOrigin(0.5);
         }
 
         // ── Play Again button ─────────────────────────────────────
         const btnY = H - 72;
-        const btn = this.add.rectangle(W / 2, btnY, 200, 42, 0x2d1b69)
-            .setStrokeStyle(2, 0x9b59b6)
+        const btn = this.add.rectangle(W / 2, btnY, 200, 42, 0x5c4033)
+            .setStrokeStyle(2, 0xc9a96e)
             .setInteractive({ useHandCursor: true });
 
         const btnText = this.add.text(W / 2, btnY, '▶  Play Again', {
             fontFamily: 'monospace',
             fontSize: '15px',
-            color: '#e0aaff',
-            stroke: '#000',
+            color: '#f5e6c8',
+            stroke: '#2b1d0e',
             strokeThickness: 3,
         }).setOrigin(0.5);
 
         // Hover pulse
-        btn.on('pointerover', () => btn.setFillStyle(0x4a2d9c));
-        btn.on('pointerout', () => btn.setFillStyle(0x2d1b69));
+        btn.on('pointerover', () => btn.setFillStyle(0x7a5a45));
+        btn.on('pointerout', () => btn.setFillStyle(0x5c4033));
 
         btn.on('pointerdown', () => {
             // Reset RunManager state
@@ -144,7 +144,7 @@ export class EndScene extends Phaser.Scene {
             if (!isSuccess) run.runBag = [];
 
             // Fade out and restart GameScene
-            this.cameras.main.fadeOut(400, 0, 0, 0);
+            this.cameras.main.fadeOut(400, 212, 196, 160);
             this.cameras.main.once('camerafadeoutcomplete', () => {
                 this.scene.start('GameScene');
             });
@@ -162,6 +162,6 @@ export class EndScene extends Phaser.Scene {
         });
 
         // Entrance: fade in whole scene
-        this.cameras.main.fadeIn(500, 0, 0, 0);
+        this.cameras.main.fadeIn(500, 212, 196, 160);
     }
 }
